@@ -1,0 +1,373 @@
+\
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Videojuegos - Admin (Previa)</title>
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#0f0f0f;
+      --accent:#00ff6a;
+      --muted:#9aa0a6;
+      --danger:#ff4d4d;
+      --glass: rgba(255,255,255,0.03);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#050505 0%, #0b0b0b 100%);color:#e6f0ea}
+    .container{max-width:1000px;margin:32px auto;padding:20px}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+    .logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),#24ff9a);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#031007;font-size:30px;box-shadow:0 6px 28px rgba(0,255,106,0.08)}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+    .card{background:var(--card);padding:14px;border-radius:10px;box-shadow: 0 6px 20px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.02)}
+    form .row{display:flex;gap:8px;margin-bottom:8px}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    input[type="text"], input[type="number"], input[type="date"], select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;font-size:14px}
+    button{padding:10px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),#00d66e);color:#031007}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .btn-danger{background:var(--danger);color:#fff}
+    .table{width:100%;border-collapse:collapse;margin-top:6px}
+    .table th, .table td{padding:8px 10px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.02);font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+    .actions button{margin-right:6px}
+    .full-width{grid-column:1 / -1}
+    footer{margin-top:20px;color:var(--muted);font-size:12px;text-align:center}
+    .msg{padding:8px;border-radius:8px;margin-bottom:8px;font-size:13px}
+    .msg.ok{background:rgba(0,255,106,0.07);color:var(--accent);border:1px solid rgba(0,255,106,0.08)}
+    .msg.err{background:rgba(255,77,77,0.06);color:var(--danger);border:1px solid rgba(255,77,77,0.08)}
+    @media(max-width:880px){
+      .grid{grid-template-columns:1fr}
+      .logo{width:48px;height:48px;font-size:26px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">JS</div>
+      <div>
+        <h1>Videojuegos — Admin (Previa)</h1>
+        <p class="lead">Gestiona la colección de videojuegos. CRUD completo: create, list, update y delete.</p>
+      </div>
+    </header>
+
+    <div id="message-area"></div>
+
+    <div class="grid">
+      <div class="card">
+        <h3 id="form-title">Crear nuevo juego</h3>
+        <form id="game-form">
+          <input type="hidden" id="game-id" />
+          <div class="row">
+            <div style="flex:1">
+              <label>Título</label>
+              <input id="title" type="text" required placeholder="Ej: Elden Ring" />
+            </div>
+            <div style="width:160px">
+              <label>Género</label>
+              <input id="genre" type="text" required placeholder="RPG, FPS..." />
+            </div>
+          </div>
+
+          <div class="row">
+            <div style="flex:1">
+              <label>Plataforma</label>
+              <input id="platform" type="text" placeholder="PC, PS5, Switch..." />
+            </div>
+            <div style="width:160px">
+              <label>Precio (USD)</label>
+              <input id="price" type="number" step="0.01" min="0" placeholder="59.99" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div style="flex:1">
+              <label>Fecha de lanzamiento</label>
+              <input id="releaseDate" type="date" />
+            </div>
+            <div style="width:200px">
+              <label>Desarrollador</label>
+              <input id="developer" type="text" placeholder="FromSoftware" />
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button type="submit" class="btn-primary" id="submit-btn">Crear</button>
+            <button type="button" class="btn-ghost" id="clear-btn">Limpiar</button>
+            <button type="button" id="load-sample" class="btn-ghost">Cargar ejemplo</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Lista de Videojuegos</h3>
+          <div>
+            <button id="refresh" class="btn-ghost">Refrescar</button>
+          </div>
+        </div>
+
+        <div style="margin-top:8px" id="count" class="muted">Cargando...</div>
+
+        <div style="overflow:auto;margin-top:10px">
+          <table class="table" id="games-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Género</th>
+                <th>Plataforma</th>
+                <th>Precio</th>
+                <th>Release</th>
+                <th>Dev</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="games-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card full-width">
+        <h3>Detalles / Respuesta raw</h3>
+        <pre id="raw-response" style="white-space:pre-wrap;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;max-height:260px;overflow:auto;font-size:13px">Aquí verás la respuesta completa del servidor.</pre>
+      </div>
+    </div>
+
+    <footer>
+      Ejecuta tu API en <code>http://localhost:9000</code> y usa esta interfaz para probar el CRUD.
+    </footer>
+  </div>
+
+  <script>
+    const BASE_URL = 'http://localhost:9000/api/games';
+
+    const elements = {
+      form: document.getElementById('game-form'),
+      id: document.getElementById('game-id'),
+      title: document.getElementById('title'),
+      genre: document.getElementById('genre'),
+      platform: document.getElementById('platform'),
+      price: document.getElementById('price'),
+      releaseDate: document.getElementById('releaseDate'),
+      developer: document.getElementById('developer'),
+      submitBtn: document.getElementById('submit-btn'),
+      clearBtn: document.getElementById('clear-btn'),
+      loadSample: document.getElementById('load-sample'),
+      refreshBtn: document.getElementById('refresh'),
+      gamesBody: document.getElementById('games-body'),
+      count: document.getElementById('count'),
+      raw: document.getElementById('raw-response'),
+      messageArea: document.getElementById('message-area'),
+      formTitle: document.getElementById('form-title')
+    };
+
+    function showMessage(text, type='ok', timeout=3500){
+      elements.messageArea.innerHTML = '<div class="msg ' + (type==='ok'?'ok':'err') + '">' + text + '</div>';
+      if(timeout) setTimeout(()=> elements.messageArea.innerHTML = '', timeout);
+    }
+
+    function setRaw(obj){
+      elements.raw.textContent = JSON.stringify(obj, null, 2);
+    }
+
+    function clearForm(){
+      elements.id.value = '';
+      elements.title.value = '';
+      elements.genre.value = '';
+      elements.platform.value = '';
+      elements.price.value = '';
+      elements.releaseDate.value = '';
+      elements.developer.value = '';
+      elements.submitBtn.textContent = 'Crear';
+      elements.formTitle.textContent = 'Crear nuevo juego';
+    }
+
+    async function fetchAll(){
+      try{
+        const res = await fetch(BASE_URL);
+        const data = await res.json();
+        renderTable(data);
+        elements.count.textContent = data.length + ' juegos encontrados';
+        setRaw(data);
+      }catch(err){
+        console.error(err);
+        showMessage('Error obteniendo juegos. ¿La API está corriendo?', 'err', 6000);
+      }
+    }
+
+    async function createGame(payload){
+      try{
+        const res = await fetch(BASE_URL, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        setRaw(data);
+        showMessage('Juego creado (ID: ' + data.id + ')');
+        clearForm();
+        fetchAll();
+      }catch(err){
+        console.error(err);
+        showMessage('Error creando juego', 'err');
+      }
+    }
+
+    async function updateGame(id, payload){
+      try{
+        const res = await fetch(BASE_URL + '/' + id, {
+          method: 'PUT',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        setRaw(data);
+        showMessage('Juego actualizado (ID: ' + data.id + ')');
+        clearForm();
+        fetchAll();
+      }catch(err){
+        console.error(err);
+        showMessage('Error actualizando juego', 'err');
+      }
+    }
+
+    async function deleteGame(id){
+      if(!confirm('¿Eliminar juego con ID ' + id + '?')) return;
+      try{
+        const res = await fetch(BASE_URL + '/' + id, { method: 'DELETE' });
+        if(res.status === 204){
+          showMessage('Juego eliminado (ID: ' + id + ')');
+          setRaw({deletedId: id});
+          fetchAll();
+        } else {
+          const data = await res.json();
+          setRaw(data);
+          showMessage('No se pudo eliminar', 'err');
+        }
+      }catch(err){
+        console.error(err);
+        showMessage('Error eliminando juego', 'err');
+      }
+    }
+
+    function renderTable(items){
+      elements.gamesBody.innerHTML = '';
+      if(!items || items.length === 0){
+        elements.gamesBody.innerHTML = '<tr><td colspan="8" class="muted">No hay juegos.</td></tr>';
+        return;
+      }
+      items.forEach(g => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${g.id ?? ''}</td>
+          <td>${escapeHtml(g.title ?? '')}</td>
+          <td>${escapeHtml(g.genre ?? '')}</td>
+          <td>${escapeHtml(g.platform ?? '')}</td>
+          <td>${g.price != null ? ('$' + g.price.toFixed(2)) : ''}</td>
+          <td>${g.releaseDate ?? ''}</td>
+          <td>${escapeHtml(g.developer ?? '')}</td>
+          <td class="actions">
+            <button class="btn-ghost" data-action="edit" data-id="${g.id}">Editar</button>
+            <button class="btn-danger" data-action="delete" data-id="${g.id}">Eliminar</button>
+          </td>
+        `;
+        elements.gamesBody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(unsafe){
+      if(!unsafe) return '';
+      return unsafe
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#039;');
+    }
+
+    elements.form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const id = elements.id.value;
+      const payload = {
+        title: elements.title.value.trim(),
+        genre: elements.genre.value.trim(),
+        platform: elements.platform.value.trim(),
+        releaseDate: elements.releaseDate.value || null,
+        price: elements.price.value ? Number(elements.price.value) : null,
+        developer: elements.developer.value.trim()
+      };
+
+      if(!payload.title || !payload.genre){
+        showMessage('El título y género son obligatorios', 'err');
+        return;
+      }
+
+      if(id){
+        updateGame(id, payload);
+      } else {
+        createGame(payload);
+      }
+    });
+
+    elements.clearBtn.addEventListener('click', (e)=>{
+      clearForm();
+    });
+
+    elements.loadSample.addEventListener('click', ()=>{
+      elements.title.value = 'Elden Ring';
+      elements.genre.value = 'RPG';
+      elements.platform.value = 'PC';
+      elements.releaseDate.value = '2022-02-25';
+      elements.price.value = '59.99';
+      elements.developer.value = 'FromSoftware';
+    });
+
+    elements.refreshBtn.addEventListener('click', fetchAll);
+
+    elements.gamesBody.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      if(action === 'edit'){
+        loadIntoForm(id);
+      } else if(action === 'delete'){
+        deleteGame(id);
+      }
+    });
+
+    async function loadIntoForm(id){
+      try{
+        const res = await fetch(BASE_URL + '/' + id);
+        if(!res.ok){
+          const err = await res.json();
+          setRaw(err);
+          showMessage(err.error || 'Juego no encontrado', 'err');
+          return;
+        }
+        const g = await res.json();
+        elements.id.value = g.id;
+        elements.title.value = g.title ?? '';
+        elements.genre.value = g.genre ?? '';
+        elements.platform.value = g.platform ?? '';
+        elements.price.value = g.price ?? '';
+        elements.releaseDate.value = g.releaseDate ?? '';
+        elements.developer.value = g.developer ?? '';
+        elements.submitBtn.textContent = 'Actualizar';
+        elements.formTitle.textContent = 'Editar juego (ID: ' + g.id + ')';
+        window.scrollTo({top:0,behavior:'smooth'});
+      }catch(err){
+        console.error(err);
+        showMessage('Error cargando el juego', 'err');
+      }
+    }
+
+    fetchAll();
+  </script>
+</body>
+</html>
