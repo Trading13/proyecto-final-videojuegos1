@@ -7,7 +7,9 @@ API REST para la gestión de videojuegos, desarrollada como práctica académica
 ## 👨‍💻 Autores
 
 **Juan David Cartagena**
+
 **Scarleth julieth covos**
+
 Proyecto desarrollado con fines educativos y de aprendizaje.
 
 ---
