@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/games")
-@CrossOrigin("")
+@RestController //recibe peticiones HTTP y devuelve respuestas JSON
+@RequestMapping("/api/games") //ruta base API
+@CrossOrigin("") //permite que un fronted llame a endpoints
 public class GameController {
 
     private final GameService gameService;
@@ -28,22 +28,22 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping
+    @PostMapping //crear videojuego
     public ResponseEntity<GameResponseDTO> createGame(@Valid @RequestBody GameRequestDTO dto) {
         return ResponseEntity.ok(gameService.createGame(dto));
     }
 
-    @GetMapping
+    @GetMapping //listar todos
     public ResponseEntity<List<GameResponseDTO>> getAllGames() {
         return ResponseEntity.ok(gameService.getAllGames());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}") //buscar por ID
     public ResponseEntity<GameResponseDTO> getGameById(@PathVariable Long id) {
         return ResponseEntity.ok(gameService.getGameById(id));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}") //actualizar
     public ResponseEntity<GameResponseDTO> updateGame(
             @PathVariable Long id,
             @Valid @RequestBody GameRequestDTO dto
@@ -51,7 +51,7 @@ public class GameController {
         return ResponseEntity.ok(gameService.updateGame(id, dto));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}") //eliminar
     public ResponseEntity<Void> deleteGame(@PathVariable Long id) {
         gameService.deleteGame(id);
         return ResponseEntity.noContent().build();
